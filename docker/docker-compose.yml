@@ -1,0 +1,30 @@
+version: '3.4'
+
+services:
+  dev_env:
+    runtime: nvidia
+    deploy:
+      resources:
+        reservations:
+          devices:
+          - driver: nvidia
+            device_ids: ['0',]
+            capabilities: [gpu]
+    build: .
+    shm_size: 64gb
+    volumes:
+    # - mount_html:/mnt/html
+    #  - mount_interhands:/mnt/interhands
+    #  - mount_texture_nn:/mnt/texture_nn
+      - .:/workspace2/
+      - /home/gsav/DOTA_v1.5:/workspace2/DOTA_v1.5
+      - /home/gsav/ShipRSImageNet:/workspace2/ShipRSImageNet
+    #  - mount_results:/mnt/Results
+    #environment:
+    #  PYTHONPATH: ${PYTHONPATH}:/mnt/html
+    #  PATHS_DATA: /workspace/data
+    #  PATHS_DATASET: /mnt/interhands
+    #  PATHS_TEXTURENN: /mnt/texture_nn/netsub1.pt
+    #  PATHS_HTML: /mnt/html
+    #  PATHS_RESULTS: /mnt/Results
+    command: tail -F anything
