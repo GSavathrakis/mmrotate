@@ -1,6 +1,7 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import argparse
 import subprocess
+from collections import OrderedDict
 
 import torch
 
@@ -26,6 +27,13 @@ def process_checkpoint(in_file, out_file):
     # remove optimizer for smaller file size
     if 'optimizer' in checkpoint:
         del checkpoint['optimizer']
+    if 'state_dict' in checkpoint:
+        in_state_dict = checkpoint.pop('state_dict')
+        out_state_dict = OrderedDict()
+        for key, val in in_state_dict.items():
+            key = key.replace('backbone.','')
+            out_state_dict[key] = val
+        checkpoint['state_dict'] = out_state_dict
     # if it is necessary to remove some sensitive data in checkpoint['meta'],
     # add the code here.
     if torch.__version__ >= '1.6':

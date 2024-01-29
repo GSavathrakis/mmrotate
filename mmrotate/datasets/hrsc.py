@@ -57,7 +57,7 @@ class HRSCDataset(CustomDataset):
     def __init__(self,
                  ann_file,
                  pipeline,
-                 img_subdir='JPEGImages',
+                 img_subdir='AllImages',
                  ann_subdir='Annotations',
                  classwise=False,
                  version='oc',
@@ -95,8 +95,9 @@ class HRSCDataset(CustomDataset):
 
             filename = osp.join(self.img_subdir, f'{img_id}.bmp')
             data_info['filename'] = f'{img_id}.bmp'
-            xml_path = osp.join(self.img_prefix, self.ann_subdir,
+            xml_path = osp.join(self.ann_subdir,
                                 f'{img_id}.xml')
+            #print(f'HERE THE PATHS: {self.img_prefix} AND {self.ann_subdir} AND {xml_path}')
             tree = ET.parse(xml_path)
             root = tree.getroot()
 
@@ -144,16 +145,18 @@ class HRSCDataset(CustomDataset):
                         poly2obb_np(polygon, self.version), dtype=np.float32)
                 else:
                     bbox = bbox[0, :-1]
+                """
                 head = np.array([
                     int(obj.find('header_x').text),
                     int(obj.find('header_y').text)
                 ],
                                 dtype=np.int64)
+                """
 
                 gt_bboxes.append(bbox)
                 gt_labels.append(label)
                 gt_polygons.append(polygon)
-                gt_headers.append(head)
+                #gt_headers.append(head)
 
             if gt_bboxes:
                 data_info['ann']['bboxes'] = np.array(
@@ -162,15 +165,19 @@ class HRSCDataset(CustomDataset):
                     gt_labels, dtype=np.int64)
                 data_info['ann']['polygons'] = np.array(
                     gt_polygons, dtype=np.float32)
+                """
                 data_info['ann']['headers'] = np.array(
                     gt_headers, dtype=np.int64)
+                """
             else:
                 data_info['ann']['bboxes'] = np.zeros((0, 5), dtype=np.float32)
                 data_info['ann']['labels'] = np.array([], dtype=np.int64)
                 data_info['ann']['polygons'] = np.zeros((0, 8),
                                                         dtype=np.float32)
+                """
                 data_info['ann']['headers'] = np.zeros((0, 2),
                                                        dtype=np.float32)
+                """
 
             if gt_polygons_ignore:
                 data_info['ann']['bboxes_ignore'] = np.array(
@@ -257,7 +264,7 @@ class HRSCDataset(CustomDataset):
                     logger=logger,
                     nproc=nproc)
                 mean_aps.append(mean_ap)
-                eval_results[f'AP{int(iou_thr * 100):02d}'] = round(mean_ap, 3)
+                eval_results[f'AP{int(iou_thr * 100):02d}'] = round(mean_ap, 4)
             eval_results['mAP'] = sum(mean_aps) / len(mean_aps)
             eval_results.move_to_end('mAP', last=False)
         elif metric == 'recall':
